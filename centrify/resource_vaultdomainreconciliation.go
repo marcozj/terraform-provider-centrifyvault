@@ -9,12 +9,12 @@ import (
 	"github.com/marcozj/golang-sdk/restapi"
 )
 
-func resourceDomainReconciliation() *schema.Resource {
+func resourceVaultDomainReconciliation() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDomainReconciliationCreate,
-		Read:   resourceDomainReconciliationRead,
-		Update: resourceDomainReconciliationUpdate,
-		Delete: resourceDomainReconciliationDelete,
+		Create: resourceVaultDomainReconciliationCreate,
+		Read:   resourceVaultDomainReconciliationRead,
+		Update: resourceVaultDomainReconciliationUpdate,
+		Delete: resourceVaultDomainReconciliationDelete,
 
 		Schema: map[string]*schema.Schema{
 			"domain_id": {
@@ -83,7 +83,7 @@ func resourceDomainReconciliation() *schema.Resource {
 	}
 }
 
-func resourceDomainReconciliationRead(d *schema.ResourceData, m interface{}) error {
+func resourceVaultDomainReconciliationRead(d *schema.ResourceData, m interface{}) error {
 	logger.Infof("Reading Domain reconciliation settings: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
@@ -96,7 +96,7 @@ func resourceDomainReconciliationRead(d *schema.ResourceData, m interface{}) err
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error reading Domain: %v", err)
+		return fmt.Errorf("Error reading Domain: %v", err)
 	}
 	//logger.Debugf("Domain from tenant: %v", object)
 
@@ -114,7 +114,7 @@ func resourceDomainReconciliationRead(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func resourceDomainReconciliationCreate(d *schema.ResourceData, m interface{}) error {
+func resourceVaultDomainReconciliationCreate(d *schema.ResourceData, m interface{}) error {
 	logger.Infof("Beginning Domain reconciliation settings: %s", ResourceIDString(d))
 
 	// Enable partial state mode
@@ -130,7 +130,7 @@ func resourceDomainReconciliationCreate(d *schema.ResourceData, m interface{}) e
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error reading Domain: %v", err)
+		return fmt.Errorf("Error reading Domain: %v", err)
 	}
 
 	// Get the rest of attributes
@@ -142,7 +142,7 @@ func resourceDomainReconciliationCreate(d *schema.ResourceData, m interface{}) e
 	// set administrative account
 	err = object.SetAdminAccount()
 	if err != nil {
-		return fmt.Errorf("error setting Domain administrative account: %v", err)
+		return fmt.Errorf("Error setting Domain administrative account: %v", err)
 	}
 
 	d.SetPartial("administrative_account_id")
@@ -151,16 +151,16 @@ func resourceDomainReconciliationCreate(d *schema.ResourceData, m interface{}) e
 	// Update Reconciliation Options and Unix/Linux Local Accounts settings
 	_, err = object.Update()
 	if err != nil {
-		return fmt.Errorf("error updating Domain: %v", err)
+		return fmt.Errorf("Error updating Domain: %v", err)
 	}
 
 	// Creation completed
 	d.Partial(false)
 	logger.Infof("Setting of Domain reconciliation completed: %s", object.Name)
-	return resourceDomainReconciliationRead(d, m)
+	return resourceVaultDomainReconciliationRead(d, m)
 }
 
-func resourceDomainReconciliationUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceVaultDomainReconciliationUpdate(d *schema.ResourceData, m interface{}) error {
 	logger.Infof("Beginning Domain reconciliation update: %s", ResourceIDString(d))
 
 	// Enable partial state mode
@@ -174,7 +174,7 @@ func resourceDomainReconciliationUpdate(d *schema.ResourceData, m interface{}) e
 	// return here to prevent further processing.
 	if err != nil {
 		//d.SetId("")
-		return fmt.Errorf("error reading Domain: %v", err)
+		return fmt.Errorf("Error reading Domain: %v", err)
 	}
 
 	err = createUpateGetDomainReconciliationData(d, object)
@@ -186,7 +186,7 @@ func resourceDomainReconciliationUpdate(d *schema.ResourceData, m interface{}) e
 	if d.HasChange("administrative_account_id") {
 		err := object.SetAdminAccount()
 		if err != nil {
-			return fmt.Errorf("error updating Domain administrative account: %v", err)
+			return fmt.Errorf("Error updating Domain administrative account: %v", err)
 		}
 		d.SetPartial("administrative_account_id")
 	}
@@ -195,7 +195,7 @@ func resourceDomainReconciliationUpdate(d *schema.ResourceData, m interface{}) e
 		"provisioning_admin_id", "reconciliation_account_name") {
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("error updating Domain attribute: %v", err)
+			return fmt.Errorf("Error updating Domain attribute: %v", err)
 		}
 		d.SetPartial("auto_domain_account_maintenance")
 		d.SetPartial("auto_local_account_maintenance")
@@ -207,10 +207,10 @@ func resourceDomainReconciliationUpdate(d *schema.ResourceData, m interface{}) e
 
 	d.Partial(false)
 	logger.Infof("Updating of Domain reconciliation completed: %s", object.Name)
-	return resourceDomainReconciliationRead(d, m)
+	return resourceVaultDomainReconciliationRead(d, m)
 }
 
-func resourceDomainReconciliationDelete(d *schema.ResourceData, m interface{}) error {
+func resourceVaultDomainReconciliationDelete(d *schema.ResourceData, m interface{}) error {
 	logger.Infof("Beginning removing of Domain reconciliation settings: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
@@ -221,7 +221,7 @@ func resourceDomainReconciliationDelete(d *schema.ResourceData, m interface{}) e
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error reading Domain: %v", err)
+		return fmt.Errorf("Error reading Domain: %v", err)
 	}
 	object.AdminAccountID = ""
 	object.ProvisioningAdminID = ""
@@ -233,12 +233,12 @@ func resourceDomainReconciliationDelete(d *schema.ResourceData, m interface{}) e
 
 	err = object.SetAdminAccount()
 	if err != nil {
-		return fmt.Errorf("error setting Domain administrative account: %v", err)
+		return fmt.Errorf("Error setting Domain administrative account: %v", err)
 	}
 
 	resp, err := object.Update()
 	if err != nil || !resp.Success {
-		return fmt.Errorf("error removing of Domain reconciliation settings: %v", err)
+		return fmt.Errorf("Error removing of Domain reconciliation settings: %v", err)
 	}
 
 	d.SetId("")

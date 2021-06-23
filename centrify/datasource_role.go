@@ -9,62 +9,49 @@ import (
 	"github.com/marcozj/golang-sdk/restapi"
 )
 
-func dataSourceRole_deprecated() *schema.Resource {
-	return &schema.Resource{
-		Read: dataSourceRoleRead,
-
-		Schema:             getDSRoleSchema(),
-		DeprecationMessage: "dataresource centrifyvault_role is deprecated will be removed in the future, use centrify_role instead",
-	}
-}
-
 func dataSourceRole() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceRoleRead,
 
-		Schema: getDSRoleSchema(),
-	}
-}
-
-func getDSRoleSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"name": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Name of the role",
-		},
-		"description": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "Description of an role",
-		},
-		"adminrights": {
-			Type:     schema.TypeSet,
-			Computed: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the role",
 			},
-		},
-		"member": {
-			Type:     schema.TypeSet,
-			Optional: true,
-			Set:      customRoleMemberHash,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"id": {
-						Type:        schema.TypeString,
-						Computed:    true,
-						Description: "ID of the member",
-					},
-					"name": {
-						Type:        schema.TypeString,
-						Computed:    true,
-						Description: "Name of the member",
-					},
-					"type": {
-						Type:        schema.TypeString,
-						Computed:    true,
-						Description: "Type of the member",
+			"description": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Description of an role",
+			},
+			"adminrights": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"member": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Set:      customRoleMemberHash,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "ID of the member",
+						},
+						"name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Name of the member",
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Type of the member",
+						},
 					},
 				},
 			},

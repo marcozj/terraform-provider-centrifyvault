@@ -2,19 +2,19 @@
 subcategory: "Resources"
 ---
 
-# centrify_multiplexedaccount (Data Source)
+# centrifyvault_multiplexedaccount (Data Source)
 
 This data source gets information of multiplexed account.
 
 ## Example Usage
 
 ```terraform
-data "centrify_multiplexedaccount" "testmultiplex" {
+data "centrifyvault_multiplexedaccount" "testmultiplex" {
   name = "Test Multiplex"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_service)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_service)
 
 ## Search Attributes
 

@@ -15,22 +15,6 @@ import (
 	"github.com/marcozj/golang-sdk/restapi"
 )
 
-func resourceOauthWebApp_deprecated() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceOauthWebAppCreate,
-		Read:   resourceOauthWebAppRead,
-		Update: resourceOauthWebAppUpdate,
-		Delete: resourceOauthWebAppDelete,
-		Exists: resourceOauthWebAppExists,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
-		Schema:             getOauthWebAppSchema(),
-		DeprecationMessage: "resource centrifyvault_webapp_oauth is deprecated will be removed in the future, use centrify_webapp_oauth instead",
-	}
-}
-
 func resourceOauthWebApp() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceOauthWebAppCreate,
@@ -42,7 +26,54 @@ func resourceOauthWebApp() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
-		Schema: getOauthWebAppSchema(),
+		Schema: map[string]*schema.Schema{
+			"template_name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Template name of the Web App",
+				ValidateFunc: validation.StringInSlice([]string{
+					applicationtemplate.OAuth2Client.String(),
+					applicationtemplate.OAuth2Server.String(),
+				}, false),
+			},
+			"name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the Web App",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the Web App",
+			},
+			"application_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Application ID. Specify the name or 'target' that the mobile application uses to find this application.",
+			},
+			"oauth_profile": getOAuthProfileSchema(),
+			"script": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Script to customize JWT token creation for this application",
+			},
+			"oidc_script": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"sets": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Set:      schema.HashString,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Add to list of Sets",
+			},
+			"permission": getPermissionSchema(),
+		},
 	}
 }
 
@@ -174,57 +205,6 @@ func getOAuthScopeSchema() *schema.Schema {
 				},
 			},
 		},
-	}
-}
-
-func getOauthWebAppSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"template_name": {
-			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
-			Description: "Template name of the Web App",
-			ValidateFunc: validation.StringInSlice([]string{
-				applicationtemplate.OAuth2Client.String(),
-				applicationtemplate.OAuth2Server.String(),
-			}, false),
-		},
-		"name": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Name of the Web App",
-		},
-		"description": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Description of the Web App",
-		},
-		"application_id": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Application ID. Specify the name or 'target' that the mobile application uses to find this application.",
-		},
-		"oauth_profile": getOAuthProfileSchema(),
-		"script": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Script to customize JWT token creation for this application",
-		},
-		"oidc_script": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Computed: true,
-		},
-		"sets": {
-			Type:     schema.TypeSet,
-			Optional: true,
-			Set:      schema.HashString,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Description: "Add to list of Sets",
-		},
-		"permission": getPermissionSchema(),
 	}
 }
 

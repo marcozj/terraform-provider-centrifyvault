@@ -9,15 +9,15 @@ connector_list is a common attribute in various resources.
 ## Example Usage
 
 ```terraform
-data "centrify_connector" "connector1" {
+data "centrifyvault_connector" "connector1" {
     name = "connector_host1" // Connector name registered in Centrify
 }
 
-data "centrify_connector" "connector2" {
+data "centrifyvault_connector" "connector2" {
     name = "connector_host2" Connector name registered in Centrify
 }
 
-resource "centrify_system" "linuxsystem" {
+resource "centrifyvault_vaultsystem" "linuxsystem" {
     name = "Test Linux"
     fqdn = "192.168.2.1"
     computer_class = "Unix"
@@ -26,8 +26,8 @@ resource "centrify_system" "linuxsystem" {
     port = 22
 
     connector_list = [
-        data.centrify_connector.connector1.id,
-        data.centrify_connector.connector2.id
+        data.centrifyvault_connector.connector1.id,
+        data.centrifyvault_connector.connector2.id
     ]
 }
 ```

@@ -2,19 +2,19 @@
 subcategory: "Resources"
 ---
 
-# centrify_desktopapp (Data Source)
+# centrifyvault_desktopapp (Data Source)
 
 This data source gets information of desktop app.
 
 ## Example Usage
 
 ```terraform
-data "centrify_desktopapp" "test_desktopapp" {
+data "centrifyvault_desktopapp" "test_desktopapp" {
     name = "Test Desktop App"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_desktopapp)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_desktopapp)
 
 ## Search Attributes
 

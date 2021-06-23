@@ -2,19 +2,19 @@
 subcategory: "Settings"
 ---
 
-# centrify_authenticationprofile (Data Source)
+# centrifyvault_authenticationprofile (Data Source)
 
 This data source gets information of authentication profile.
 
 ## Example Usage
 
 ```terraform
-data "centrify_authenticationprofile" "new_device" {
+data "centrifyvault_authenticationprofile" "new_device" {
     name = "Default New Device Login Profile"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_authenticationprofile)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_authenticationprofile)
 
 ## Search Attributes
 

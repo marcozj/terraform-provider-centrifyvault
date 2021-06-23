@@ -2,14 +2,14 @@
 subcategory: "Resources"
 ---
 
-# centrify_database (Resource)
+# centrifyvault_vaultdatabase (Resource)
 
 This resource allows you to create/update/delete database.
 
 ## Example Usage
 
 ```terraform
-resource "centrify_database" "mssql" {
+resource "centrifyvault_vaultdatabase" "mssql" {
   # Database -> Settings menu related settings
   name           = "My MS SQL"
   hostname       = "mssql.example.com"
@@ -20,7 +20,7 @@ resource "centrify_database" "mssql" {
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_database)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_vaultdatabase)
 
 ## Argument Reference
 
@@ -55,7 +55,7 @@ More examples can be found [here](https://github.com/marcozj/terraform-provider-
 Database can be imported using the resource `id`, e.g.
 
 ```shell
-terraform import centrify_database.example xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import centrifyvault_vaultdatabase.example xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 **Limitation:** `permission` and `set` aren't support in import process.

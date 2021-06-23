@@ -2,7 +2,7 @@
 subcategory: "Settings"
 ---
 
-# centrify_directoryobject (Data Source)
+# centrifyvault_directoryobject (Data Source)
 
 This data source gets information of directory object such as account and group.
 
@@ -10,22 +10,22 @@ This data source gets information of directory object such as account and group.
 
 ```terraform
 // data source for Active Directory domain demo.lab
-data "centrify_directoryservice" "demo_lab" {
+data "centrifyvault_directoryservice" "demo_lab" {
     name = "demo.lab"
     type = "Active Directory"
 }
 
 // data source for AD user ad.user@demo.lab
-data "centrify_directoryobject" "ad_user" {
+data "centrifyvault_directoryobject" "ad_user" {
     directory_services = [
-        data.centrify_directoryservice.demo_lab.id
+        data.centrifyvault_directoryservice.demo_lab.id
     ]
     name = "ad.user"
     object_type = "User"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_role)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_role)
 
 ## Search Attributes
 

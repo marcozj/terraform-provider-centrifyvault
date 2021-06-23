@@ -11,21 +11,21 @@ workflow_approver is a common attribute in various resources.
 ### Example of one level approval that assigned to a role
 
 ```terraform
-data "centrify_role" "approvers" {
+data "centrifyvault_role" "approvers" {
   name = "Access Approvers"
 }
 
-resource "centrify_account" "windows_account" {
+resource "centrifyvault_vaultaccount" "windows_account" {
     name = "testaccount"
     credential_type = "Password"
     password = "xxxxxxxxxxxxxx"
-    host_id = centrify_system.windows1.id
+    host_id = centrifyvault_vaultsystem.windows1.id
     description = "Test Account for Windows"
 
     workflow_enabled = true
     workflow_approver {
-      guid = data.centrify_role.approvers.id
-      name = data.centrify_role.approvers.name
+      guid = data.centrifyvault_role.approvers.id
+      name = data.centrifyvault_role.approvers.name
       type = "Role"
     }
 }
@@ -34,21 +34,21 @@ resource "centrify_account" "windows_account" {
 ### Example of one level approval that assigned to a Centrify Directory user
 
 ```terraform
-data "centrify_user" "approver" {
+data "centrifyvault_user" "approver" {
   username = "approver@example.com"
 }
 
-resource "centrify_account" "windows_account" {
+resource "centrifyvault_vaultaccount" "windows_account" {
     name = "testaccount"
     credential_type = "Password"
     password = "xxxxxxxxxxxxxx"
-    host_id = centrify_system.windows1.id
+    host_id = centrifyvault_vaultsystem.windows1.id
     description = "Test Account for Windows"
 
     workflow_enabled = true
     workflow_approver {
-      guid = data.centrify_user.approver.id
-      name = data.centrify_user.approver.username
+      guid = data.centrifyvault_user.approver.id
+      name = data.centrifyvault_user.approver.username
       type = "User"
     }
 }
@@ -57,11 +57,11 @@ resource "centrify_account" "windows_account" {
 ### Example of one level approval that assigned to manager with backup approver
 
 ```terraform
-resource "centrify_account" "windows_account" {
+resource "centrifyvault_vaultaccount" "windows_account" {
     name = "testaccount"
     credential_type = "Password"
     password = "xxxxxxxxxxxxxx"
-    host_id = centrify_system.windows1.id
+    host_id = centrifyvault_vaultsystem.windows1.id
     description = "Test Account for Windows"
 
     workflow_enabled = true
@@ -69,8 +69,8 @@ resource "centrify_account" "windows_account" {
       type = "Manager"
       no_manager_action = "useBackup"
       backup_approver {
-        guid = data.centrify_role.approvers.id
-        name = data.centrify_role.approvers.name
+        guid = data.centrifyvault_role.approvers.id
+        name = data.centrifyvault_role.approvers.name
         type = "Role"
       }
     }
@@ -80,30 +80,30 @@ resource "centrify_account" "windows_account" {
 ### Example of two levels approval. First level to an AD user while second level to user's manager
 
 ```terraform
-data "centrify_directoryservice" "demo_lab" {
+data "centrifyvault_directoryservice" "demo_lab" {
     name = "demo.lab"
     type = "Active Directory"
 }
 
 // data source for AD user ad.user@demo.lab
-data "centrify_directoryobject" "ad_user" {
+data "centrifyvault_directoryobject" "ad_user" {
     directory_services = [
-        data.centrify_directoryservice.demo_lab.id
+        data.centrifyvault_directoryservice.demo_lab.id
     ]
     name = "ad.user"
     object_type = "User"
 }
 
-resource "centrify_account" "windows_account" {
+resource "centrifyvault_vaultaccount" "windows_account" {
     name = "testaccount"
     credential_type = "Password"
     password = "xxxxxxxxxxxxxx"
-    host_id = centrify_system.windows1.id
+    host_id = centrifyvault_vaultsystem.windows1.id
     description = "Test Account for Windows"
 
     workflow_enabled = true
     workflow_approver {
-      guid = data.centrify_directoryobject.ad_user.id
+      guid = data.centrifyvault_directoryobject.ad_user.id
       name = "ad.user@demo.lab"
       type = "User"
       options_selector = true // this attribute must be added to only one approval level if there are multiple levels

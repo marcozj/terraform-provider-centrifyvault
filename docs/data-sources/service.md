@@ -2,19 +2,19 @@
 subcategory: "Resources"
 ---
 
-# centrify_service (Data Source)
+# centrifyvault_service (Data Source)
 
 This data source gets information of Windows service.
 
 ## Example Usage
 
 ```terraform
-data "centrify_service" "testservice" {
+data "centrifyvault_service" "testservice" {
     service_name = "TestWindowsService"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_service)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_service)
 
 ## Search Attributes
 

@@ -2,27 +2,27 @@
 subcategory: "Settings"
 ---
 
-# centrify_directoryservice (Data Source)
+# centrifyvault_directoryservice (Data Source)
 
 This data source gets information of directory service.
 
 ## Example Usage
 
 ```terraform
-data "centrify_directoryservice" "demo_lab" {
+data "centrifyvault_directoryservice" "demo_lab" {
     // name is the actual Active Directory doman name
     name = "demo.lab"
     type = "Active Directory"
 }
 
-data "centrify_directoryservice" "federated_dir" {
+data "centrifyvault_directoryservice" "federated_dir" {
     // name must be "Federated Directory Service"
     name = "Federated Directory Service"
     type = "Federated Directory"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_role/role_member_with_federatedgroup.tf) and [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_role/role_member_with_adgroup.tf)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_role/role_member_with_federatedgroup.tf) and [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_role/role_member_with_adgroup.tf)
 
 ## Search Attributes
 

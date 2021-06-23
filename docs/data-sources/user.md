@@ -2,19 +2,19 @@
 subcategory: "Access"
 ---
 
-# centrify_user (Data Source)
+# centrifyvault_user (Data Source)
 
 This data source gets information of Centrify Directory User.
 
 ## Example Usage
 
 ```terraform
-data "centrify_user" "admin" {
+data "centrifyvault_user" "admin" {
     username = "admin@example.com"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_user)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_user)
 
 ## Search Attributes
 

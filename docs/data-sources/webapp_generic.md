@@ -2,23 +2,23 @@
 subcategory: "Applications"
 ---
 
-# centrify_webapp_generic (Data Source)
+# centrifyvault_webapp_generic (Data Source)
 
 This data source gets information of Bookmark, Browser Extension, NTLM and Basic, User-Password web applications.
 
 ## Example Usage
 
 ```terraform
-data "centrify_webapp_generic" "generic_webapp" {
+data "centrifyvault_webapp_generic" "generic_webapp" {
   name = "Generic App"
 }
 
 output "generic_webapp_url" {
-  value = data.centrify_webapp_generic.generic_webapp.url
+  value = data.centrifyvault_webapp_generic.generic_webapp.url
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_webapp_generic)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_webapp_generic)
 
 ## Search Attributes
 

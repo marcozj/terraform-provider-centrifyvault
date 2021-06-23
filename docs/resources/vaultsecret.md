@@ -2,14 +2,14 @@
 subcategory: "Resources"
 ---
 
-# centrify_secret (Resource)
+# centrifyvault_vaultsecret (Resource)
 
 This resource allows you to create/update/delete secret.
 
 ## Example Usage
 
 ```terraform
-resource "centrify_secret" "test_secret" {
+resource "centrifyvault_vaultsecret" "test_secret" {
     secret_name = "Test Secret"
     description = "Test Secret"
     secret_text = "xxxxxxxxxxxxx"
@@ -17,7 +17,7 @@ resource "centrify_secret" "test_secret" {
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_secret)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_vaultsecret)
 
 ## Argument Reference
 
@@ -44,7 +44,7 @@ More examples can be found [here](https://github.com/marcozj/terraform-provider-
 Secret can be imported using the resource `id`, e.g.
 
 ```shell
-terraform import centrify_secret.example xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import centrifyvault_vaultsecret.example xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 **Limitation:** `permission` and `set` aren't support in import process.

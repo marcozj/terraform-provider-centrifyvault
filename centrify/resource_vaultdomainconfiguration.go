@@ -9,111 +9,92 @@ import (
 	"github.com/marcozj/golang-sdk/restapi"
 )
 
-func resourceDomainConfiguration_deprecated() *schema.Resource {
+func resourceVaultDomainConfiguration() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDomainConfigurationCreate,
-		Read:   resourceDomainConfigurationRead,
-		Update: resourceDomainConfigurationUpdate,
-		Delete: resourceDomainConfigurationDelete,
+		Create: resourceVaultDomainConfigurationCreate,
+		Read:   resourceVaultDomainConfigurationRead,
+		Update: resourceVaultDomainConfigurationUpdate,
+		Delete: resourceVaultDomainConfigurationDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 
-		Schema:             getDomainConfigurationSchema(),
-		DeprecationMessage: "resource centrifyvault_vaultdomainconfiguration is deprecated will be removed in the future, use centrify_domainconfiguration instead",
+		Schema: map[string]*schema.Schema{
+			"domain_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "ID of domain",
+			},
+			// Advanced menu -> Administrative Account Settings
+			"administrative_account_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "ID of administrative account",
+			},
+			"administrator_display_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"administrative_account_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Name of administrative account",
+			},
+			"administrative_account_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Password of administrative account",
+			},
+			"auto_domain_account_maintenance": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable Automatic Domain Account Maintenance",
+			},
+			"auto_local_account_maintenance": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable Automatic Local Account Maintenance",
+			},
+			"manual_domain_account_unlock": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable Manual Domain Account Unlock",
+			},
+			"manual_local_account_unlock": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable Manual Local Account Unlock",
+			},
+			"provisioning_admin_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Provisioning Administrative Account ID (must be managed)",
+			},
+			"reconciliation_account_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Reconciliation account name",
+			},
+			// Zone Role Workflow menu
+			"enable_zonerole_workflow": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable zone role requests for this system",
+			},
+			"assigned_zonerole":          getZoneRoleSchema(),
+			"assigned_zonerole_approver": getWorkflowApproversSchema(),
+		},
 	}
 }
 
-func resourceDomainConfiguration() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceDomainConfigurationCreate,
-		Read:   resourceDomainConfigurationRead,
-		Update: resourceDomainConfigurationUpdate,
-		Delete: resourceDomainConfigurationDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
-		Schema: getDomainConfigurationSchema(),
-	}
-}
-
-func getDomainConfigurationSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"domain_id": {
-			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
-			Description: "ID of domain",
-		},
-		// Advanced menu -> Administrative Account Settings
-		"administrative_account_id": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "ID of administrative account",
-		},
-		"administrator_display_name": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"administrative_account_name": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Computed:    true,
-			Description: "Name of administrative account",
-		},
-		"administrative_account_password": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Sensitive:   true,
-			Description: "Password of administrative account",
-		},
-		"auto_domain_account_maintenance": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     false,
-			Description: "Enable Automatic Domain Account Maintenance",
-		},
-		"auto_local_account_maintenance": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     false,
-			Description: "Enable Automatic Local Account Maintenance",
-		},
-		"manual_domain_account_unlock": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     false,
-			Description: "Enable Manual Domain Account Unlock",
-		},
-		"manual_local_account_unlock": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     false,
-			Description: "Enable Manual Local Account Unlock",
-		},
-		"provisioning_admin_id": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Provisioning Administrative Account ID (must be managed)",
-		},
-		"reconciliation_account_name": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Reconciliation account name",
-		},
-		// Zone Role Workflow menu
-		"enable_zonerole_workflow": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Description: "Enable zone role requests for this system",
-		},
-		"assigned_zonerole":          getZoneRoleSchema(),
-		"assigned_zonerole_approver": getWorkflowApproversSchema(),
-	}
-}
-
-func resourceDomainConfigurationRead(d *schema.ResourceData, m interface{}) error {
+func resourceVaultDomainConfigurationRead(d *schema.ResourceData, m interface{}) error {
 	logger.Infof("Reading Domain Configuration: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
@@ -126,7 +107,7 @@ func resourceDomainConfigurationRead(d *schema.ResourceData, m interface{}) erro
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error reading Domain: %v", err)
+		return fmt.Errorf("Error reading Domain: %v", err)
 	}
 	//logger.Debugf("Domain from tenant: %v", object)
 
@@ -158,7 +139,7 @@ func resourceDomainConfigurationRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourceDomainConfigurationCreate(d *schema.ResourceData, m interface{}) error {
+func resourceVaultDomainConfigurationCreate(d *schema.ResourceData, m interface{}) error {
 	logger.Infof("Beginning Domain Configuration: %s", ResourceIDString(d))
 
 	// Enable partial state mode
@@ -174,7 +155,7 @@ func resourceDomainConfigurationCreate(d *schema.ResourceData, m interface{}) er
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error reading Domain: %v", err)
+		return fmt.Errorf("Error reading Domain: %v", err)
 	}
 
 	// Get the rest of attributes
@@ -186,7 +167,7 @@ func resourceDomainConfigurationCreate(d *schema.ResourceData, m interface{}) er
 	// set administrative account
 	err = object.SetAdminAccount()
 	if err != nil {
-		return fmt.Errorf("error setting Domain administrative account: %v", err)
+		return fmt.Errorf("Error setting Domain administrative account: %v", err)
 	}
 
 	d.SetPartial("administrative_account_id")
@@ -195,16 +176,16 @@ func resourceDomainConfigurationCreate(d *schema.ResourceData, m interface{}) er
 	// Update Reconciliation Options and Unix/Linux Local Accounts settings
 	_, err = object.Update()
 	if err != nil {
-		return fmt.Errorf("error updating Domain: %v", err)
+		return fmt.Errorf("Error updating Domain: %v", err)
 	}
 
 	// Creation completed
 	d.Partial(false)
 	logger.Infof("Setting of Domain Configuration completed: %s", object.Name)
-	return resourceDomainConfigurationRead(d, m)
+	return resourceVaultDomainConfigurationRead(d, m)
 }
 
-func resourceDomainConfigurationUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceVaultDomainConfigurationUpdate(d *schema.ResourceData, m interface{}) error {
 	logger.Infof("Beginning Domain Configuration update: %s", ResourceIDString(d))
 
 	// Enable partial state mode
@@ -218,7 +199,7 @@ func resourceDomainConfigurationUpdate(d *schema.ResourceData, m interface{}) er
 	// return here to prevent further processing.
 	if err != nil {
 		//d.SetId("")
-		return fmt.Errorf("error reading Domain: %v", err)
+		return fmt.Errorf("Error reading Domain: %v", err)
 	}
 
 	err = createUpateGetDomainConfigurationData(d, object)
@@ -230,7 +211,7 @@ func resourceDomainConfigurationUpdate(d *schema.ResourceData, m interface{}) er
 	if d.HasChange("administrative_account_id") {
 		err := object.SetAdminAccount()
 		if err != nil {
-			return fmt.Errorf("error updating Domain administrative account: %v", err)
+			return fmt.Errorf("Error updating Domain administrative account: %v", err)
 		}
 		d.SetPartial("administrative_account_id")
 	}
@@ -239,7 +220,7 @@ func resourceDomainConfigurationUpdate(d *schema.ResourceData, m interface{}) er
 		"provisioning_admin_id", "reconciliation_account_name", "enable_zonerole_workflow", "assigned_zonerole", "assigned_zonerole_approver") {
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("error updating Domain attribute: %v", err)
+			return fmt.Errorf("Error updating Domain attribute: %v", err)
 		}
 		d.SetPartial("auto_domain_account_maintenance")
 		d.SetPartial("auto_local_account_maintenance")
@@ -254,10 +235,10 @@ func resourceDomainConfigurationUpdate(d *schema.ResourceData, m interface{}) er
 
 	d.Partial(false)
 	logger.Infof("Updating of Domain Configuration completed: %s", object.Name)
-	return resourceDomainConfigurationRead(d, m)
+	return resourceVaultDomainConfigurationRead(d, m)
 }
 
-func resourceDomainConfigurationDelete(d *schema.ResourceData, m interface{}) error {
+func resourceVaultDomainConfigurationDelete(d *schema.ResourceData, m interface{}) error {
 	logger.Infof("Beginning removing of Domain Configuration: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
@@ -268,7 +249,7 @@ func resourceDomainConfigurationDelete(d *schema.ResourceData, m interface{}) er
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error reading Domain: %v", err)
+		return fmt.Errorf("Error reading Domain: %v", err)
 	}
 	object.AdminAccountID = ""
 	object.ProvisioningAdminID = ""
@@ -283,12 +264,12 @@ func resourceDomainConfigurationDelete(d *schema.ResourceData, m interface{}) er
 
 	err = object.SetAdminAccount()
 	if err != nil {
-		return fmt.Errorf("error setting Domain administrative account: %v", err)
+		return fmt.Errorf("Error setting Domain administrative account: %v", err)
 	}
 
 	resp, err := object.Update()
 	if err != nil || !resp.Success {
-		return fmt.Errorf("error removing of Domain Configuration: %v", err)
+		return fmt.Errorf("Error removing of Domain Configuration: %v", err)
 	}
 
 	d.SetId("")

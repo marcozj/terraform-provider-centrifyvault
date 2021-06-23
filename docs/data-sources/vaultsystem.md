@@ -2,21 +2,21 @@
 subcategory: "Resources"
 ---
 
-# centrify_system (Data Source)
+# centrifyvault_vaultsystem (Data Source)
 
 This data source gets information of system.
 
 ## Example Usage
 
 ```terraform
-data "centrify_system" "demo_system" {
+data "centrifyvault_vaultsystem" "demo_system" {
     name = "demosystem"
     fqdn = "demosystem.example.com"
     computer_class = "Unix"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_system)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_vaultsystem)
 
 ## Search Attributes
 

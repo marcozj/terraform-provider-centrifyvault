@@ -2,19 +2,19 @@
 subcategory: "Access"
 ---
 
-# centrify_role (Data Source)
+# centrifyvault_role (Data Source)
 
 This data source gets information of role.
 
 ## Example Usage
 
 ```terraform
-data "centrify_role" "system_admin" {
+data "centrifyvault_role" "system_admin" {
     name = "System Admnistrator"
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_role)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_role)
 
 ## Search Attributes
 

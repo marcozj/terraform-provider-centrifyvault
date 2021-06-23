@@ -9,18 +9,6 @@ import (
 	"github.com/marcozj/golang-sdk/restapi"
 )
 
-func resourceGlobalGroupMappings_deprecated() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceGroupMappingCreate,
-		Read:   resourceGroupMappingRead,
-		Update: resourceGroupMappingUpdate,
-		Delete: resourceGroupMappingDelete,
-
-		Schema:             getGroupMappingSchema(),
-		DeprecationMessage: "resource centrifyvault_globalgroupmappings is deprecated will be removed in the future, use centrify_globalgroupmappings instead",
-	}
-}
-
 func resourceGlobalGroupMappings() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceGroupMappingCreate,
@@ -28,31 +16,27 @@ func resourceGlobalGroupMappings() *schema.Resource {
 		Update: resourceGroupMappingUpdate,
 		Delete: resourceGroupMappingDelete,
 
-		Schema: getGroupMappingSchema(),
-	}
-}
-
-func getGroupMappingSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"bulkupdate": {
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
-		"mapping": {
-			Type:     schema.TypeSet,
-			Optional: true,
-			Set:      customGroupMappingHash,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"attribute_value": {
-						Type:        schema.TypeString,
-						Required:    true,
-						Description: "Group attribute value",
-					},
-					"group_name": {
-						Type:        schema.TypeString,
-						Required:    true,
-						Description: "Group name",
+		Schema: map[string]*schema.Schema{
+			"bulkupdate": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"mapping": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Set:      customGroupMappingHash,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"attribute_value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Group attribute value",
+						},
+						"group_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Group name",
+						},
 					},
 				},
 			},
@@ -71,7 +55,7 @@ func resourceGroupMappingRead(d *schema.ResourceData, m interface{}) error {
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error reading global group mappings: %v", err)
+		return fmt.Errorf("Error reading global group mappings: %v", err)
 	}
 	//logger.Debugf("Manual Set from tenant: %v", object)
 
@@ -107,7 +91,7 @@ func resourceGroupMappingCreate(d *schema.ResourceData, m interface{}) error {
 		err = object.Create()
 	}
 	if err != nil {
-		return fmt.Errorf("error creating global group mappings: %v", err)
+		return fmt.Errorf("Error creating global group mappings: %v", err)
 	}
 
 	// Creation completed
@@ -138,12 +122,12 @@ func resourceGroupMappingUpdate(d *schema.ResourceData, m interface{}) error {
 			oldobject.Mappings = expandGroupMappings(old)
 			err := oldobject.Delete()
 			if err != nil {
-				return fmt.Errorf("error deleting global group mappings: %v", err)
+				return fmt.Errorf("Error deleting global group mappings: %v", err)
 			}
 
 			err = object.Create()
 			if err != nil {
-				return fmt.Errorf("error adding global group mappings: %v", err)
+				return fmt.Errorf("Error adding global group mappings: %v", err)
 			}
 		}
 	}
@@ -166,7 +150,7 @@ func resourceGroupMappingDelete(d *schema.ResourceData, m interface{}) error {
 		err = object.Delete()
 	}
 	if err != nil {
-		return fmt.Errorf("error deleting global group mappings: %v", err)
+		return fmt.Errorf("Error deleting global group mappings: %v", err)
 	}
 
 	d.SetId("")

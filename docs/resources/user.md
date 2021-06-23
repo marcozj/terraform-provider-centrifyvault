@@ -2,14 +2,14 @@
 subcategory: "Access"
 ---
 
-# centrify_user (Resource)
+# centrifyvault_user (Resource)
 
 This resource allows you to create/update/delete Centrify Directory User.
 
 ## Example Usage
 
 ```terraform
-resource "centrify_user" "testuser" {
+resource "centrifyvault_user" "testuser" {
     username = "testuser@example.com"
     email = "testuser@example.com"
     displayname = "Test User"
@@ -20,7 +20,7 @@ resource "centrify_user" "testuser" {
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_user)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_user)
 
 ## Argument Reference
 
@@ -51,7 +51,7 @@ More examples can be found [here](https://github.com/marcozj/terraform-provider-
 Centrify Directory User can be imported using the resource `id`, e.g.
 
 ```shell
-terraform import centrify_user.example xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import centrifyvault_user.example xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 **Limitation:** `roles` isn't support in import process.

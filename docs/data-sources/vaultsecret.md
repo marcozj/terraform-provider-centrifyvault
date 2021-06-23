@@ -2,20 +2,20 @@
 subcategory: "Resources"
 ---
 
-# centrify_secret (Data Source)
+# centrifyvault_vaultsecret (Data Source)
 
 This data source gets information of secret.
 
 ## Example Usage
 
 ```terraform
-data "centrify_secret" "test_secret" {
+data "centrifyvault_vaultsecret" "test_secret" {
     secret_name = "testsecret"
     checkout = true
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_secret)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_vaultsecret)
 
 ## Search Attributes
 

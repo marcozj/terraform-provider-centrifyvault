@@ -2,18 +2,18 @@
 subcategory: "Resources"
 ---
 
-# centrify_account (Resource)
+# centrifyvault_vaultaccount (Resource)
 
 This resource allows you to create/update/delete account.
 
 ## Example Usage (Resource)
 
 ```terraform
-resource "centrify_account" "unix_account" {
+resource "centrifyvault_vaultaccount" "unix_account" {
     name = "testaccount"
     credential_type = "Password"
     password = "xxxxxxxxxxxxxx"
-    host_id = centrify_system.unix1.id
+    host_id = centrifyvault_vaultsystem.unix1.id
     description = "Test Account for Unix"
     use_proxy_account = false
     checkout_lifetime = 70
@@ -21,13 +21,13 @@ resource "centrify_account" "unix_account" {
 }
 ```
 
-Examples of system account can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_system)
+Examples of system account can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_vaultsystem)
 
-Examples of database account can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_database)
+Examples of database account can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_vaultdatabase)
 
-Examples of domain account can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_domain)
+Examples of domain account can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_vaultdomain)
 
-Examples of cloud provider account can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_cloudprovider)
+Examples of cloud provider account can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_cloudprovider)
 
 ## Argument Reference
 
@@ -72,7 +72,7 @@ Required:
 Account can be imported using the resource `id`, e.g.
 
 ```shell
-terraform import centrify_account.example xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import centrifyvault_vaultaccount.example xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 **Limitation:** `permission` and `set` aren't support in import process.
