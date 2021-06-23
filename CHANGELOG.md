@@ -1,5 +1,15 @@
 # RELEASE NOTES
 
+## 0.1.8 (June 23, 2021)
+
+BUG FIXES:
+
+- Correct Connector online status query issue.
+
+NOTES:
+
+- Skipping v0.1.7
+
 ## 0.1.6 (May 15, 2021)
 
 IMPROVEMENTS:
