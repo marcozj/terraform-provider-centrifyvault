@@ -14,7 +14,7 @@ data "centrifyvault_federatedgroup" "fedgroup1" {
 }
 ```
 
-More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrify_role/role_member_with_federatedgroup.tf)
+More examples can be found [here](https://github.com/marcozj/terraform-provider-centrifyvault/tree/main/examples/centrifyvault_role/role_member_with_federatedgroup.tf)
 
 ## Argument Reference
 
