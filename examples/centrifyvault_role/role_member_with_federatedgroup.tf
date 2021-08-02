@@ -6,35 +6,23 @@ data "centrifyvault_directoryservice" "federated_dir" {
     type = "Federated Directory"
 }
 
-// data source for existing federated group
-data "centrifyvault_directoryobject" "federated_group" {
-    directory_services = [
-        data.centrifyvault_directoryservice.federated_dir.id
-    ]
-    name = "Azure PAS Users"
-    object_type = "Group"
-}
-
 // Create new federated group with globalgroupmappings
-resource "centrifyvault_globalgroupmappings" "group_mapping" {
-  mapping {
-    attribute_value = "IdP Group"
-    group_name      = "IdP PAS Admin" // Assuming "IdP PAS Admin" doesn't exist yet
-  }
+resource "centrifyvault_globalgroupmappings" "group_mappings" {
+    bulkupdate = true
+    mapping = {
+        "Idp Group 1" = "Okta Infra Admins"
+        "Idp Group 2" = "Azure PAS Users" // Assuming "Azure PAS Users" doesn't exist yet and will be created by this resource
+    }
 }
 
-// data source for newly created federated group
-data "centrifyvault_directoryobject" "idp_pas_admin" {
-    directory_services = [
-        data.centrifyvault_directoryservice.federated_dir.id
-    ]
-    name = "IdP PAS Admin"
-    object_type = "Group"
+// New federated group created by centrifyvault_globalgroupmappings
+resource "centrifyvault_federatedgroup" "fedgroup2" {
+    name = centrifyvault_globalgroupmappings.group_mappings.mapping["Idp Group 2"] // Reference to "Idp Group 2" map which returns "Azure PAS Users"
+}
 
-    // Need to wait for "IdP PAS Admin" created first
-    depends_on = [
-        centrifyvault_globalgroupmappings.group_mapping,
-    ]
+// Existing federated (virtual) group
+data "centrifyvault_federatedgroup" "fedgroup1" {
+  name = "Okta Infra Admins"
 }
 
 resource "centrifyvault_role" "test_role" {
@@ -43,13 +31,13 @@ resource "centrifyvault_role" "test_role" {
 
     // Existing federated (virtual) group
     member {
-        id = data.centrifyvault_directoryobject.federated_group.id
+        id = data.centrifyvault_federatedgroup.fedgroup1.id
         type = "Group"
     }
 
     // New federated (virtual) group
     member {
-        id = data.centrifyvault_directoryobject.idp_pas_admin.id
+        id = centrifyvault_federatedgroup.fedgroup2.id
         type = "Group"
     }
 }
