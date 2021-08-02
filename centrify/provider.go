@@ -107,6 +107,7 @@ func Provider() *schema.Provider {
 			"centrifyvault_webapp_oauth":          dataSourceOauthWebApp(),
 			"centrifyvault_webapp_oidc":           dataSourceOidcWebApp(),
 			"centrifyvault_webapp_generic":        dataSourceGenericWebApp(),
+			"centrifyvault_federatedgroup":        dataSourceFederatedGroup(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"centrifyvault_user":                      resourceUser(),
@@ -135,6 +136,7 @@ func Provider() *schema.Provider {
 			"centrifyvault_webapp_oauth":              resourceOauthWebApp(),
 			"centrifyvault_webapp_oidc":               resourceOidcWebApp(),
 			"centrifyvault_webapp_generic":            resourceGenericWebApp(),
+			"centrifyvault_federatedgroup":            resourceFederatedGroup(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
