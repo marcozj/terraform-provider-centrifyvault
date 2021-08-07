@@ -15,4 +15,10 @@ resource "centrifyvault_user" "testuser" {
     redirect_mfa_user_id = data.centrifyvault_user.admin.id
     manager_username = "admin@example.com"
     
+    lifecycle {
+      ignore_changes = [
+        password,
+        confirm_password,
+        ]
+    }
 }

@@ -150,7 +150,7 @@ func resourceVaultDatabase() *schema.Resource {
 }
 
 func resourceVaultDatabaseExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	logger.Infof("Checking VaultDatabase exist: %s", ResourceIDString(d))
+	logger.Infof("Checking Database exist: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
 	object := vault.NewDatabase(client)
@@ -164,15 +164,15 @@ func resourceVaultDatabaseExists(d *schema.ResourceData, m interface{}) (bool, e
 		return false, err
 	}
 
-	logger.Infof("VaultDatabase exists in tenant: %s", object.ID)
+	logger.Infof("Database exists in tenant: %s", object.ID)
 	return true, nil
 }
 
 func resourceVaultDatabaseRead(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Reading VaultDatabase: %s", ResourceIDString(d))
+	logger.Infof("Reading Database: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
-	// Create a VaultDatabase object and populate ID attribute
+	// Create a Database object and populate ID attribute
 	object := vault.NewDatabase(client)
 	object.ID = d.Id()
 	err := object.Read()
@@ -181,9 +181,9 @@ func resourceVaultDatabaseRead(d *schema.ResourceData, m interface{}) error {
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error reading VaultDatabase: %v", err)
+		return fmt.Errorf(" Error reading Database: %v", err)
 	}
-	//logger.Debugf("VaultDatabase from tenant: %v", object)
+	//logger.Debugf("Database from tenant: %v", object)
 
 	schemamap, err := vault.GenerateSchemaMap(object)
 	if err != nil {
@@ -199,12 +199,12 @@ func resourceVaultDatabaseRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	logger.Infof("Completed reading VaultDatabase: %s", object.Name)
+	logger.Infof("Completed reading Database: %s", object.Name)
 	return nil
 }
 
 func resourceVaultDatabaseCreate(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning VaultDatabase creation: %s", ResourceIDString(d))
+	logger.Infof("Beginning Database creation: %s", ResourceIDString(d))
 
 	// Enable partial state mode
 	d.Partial(true)
@@ -213,63 +213,55 @@ func resourceVaultDatabaseCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Create a Database object and populate all attributes
 	object := vault.NewDatabase(client)
-	err := createUpateGetVaultDatabaseData(d, object)
+	err := createUpateGetDatabaseData(d, object)
 	if err != nil {
 		return err
 	}
 
 	resp, err := object.Create()
 	if err != nil {
-		return fmt.Errorf("Error creating VaultDatabase: %v", err)
+		return fmt.Errorf(" Error creating Database: %v", err)
 	}
 
 	id := resp.Result
 	if id == "" {
-		return fmt.Errorf("VaultDatabase ID is not set")
+		return fmt.Errorf(" Database ID is not set")
 	}
 	d.SetId(id)
 	// Need to populate ID attribute for subsequence processes
 	object.ID = id
 
-	d.SetPartial("name")
-	d.SetPartial("hostname")
-	d.SetPartial("database_class")
-	d.SetPartial("description")
-
-	// 2nd step to update VaultDatabase login profile
-	// Create API call doesn't set VaultDatabase login profile so need to run update again
+	// 2nd step to update Database login profile
+	// Create API call doesn't set Database login profile so need to run update again
 	resp2, err2 := object.Update()
 	if err2 != nil || !resp2.Success {
-		return fmt.Errorf("Error updating VaultDatabase attribute: %v", err2)
+		return fmt.Errorf(" Error updating Database attribute: %v", err2)
 	}
-	d.SetPartial("password_profile_id")
 
-	// 3rd step to add VaultDatabase to Sets
+	// 3rd step to add Database to Sets
 	if len(object.Sets) > 0 {
 		err := object.AddToSetsByID(object.Sets)
 		if err != nil {
 			return err
 		}
-		d.SetPartial("sets")
 	}
 
 	// 4th step to add permissions
 	if _, ok := d.GetOk("permission"); ok {
 		_, err = object.SetPermissions(false)
 		if err != nil {
-			return fmt.Errorf("Error setting VaultDatabase permissions: %v", err)
+			return fmt.Errorf(" Error setting Database permissions: %v", err)
 		}
-		d.SetPartial("permission")
 	}
 
 	// Creation completed
 	d.Partial(false)
-	logger.Infof("Creation of VaultDatabase completed: %s", object.Name)
+	logger.Infof("Creation of Database completed: %s", object.Name)
 	return resourceVaultDatabaseRead(d, m)
 }
 
 func resourceVaultDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning VaultDatabase update: %s", ResourceIDString(d))
+	logger.Infof("Beginning Database update: %s", ResourceIDString(d))
 
 	// Enable partial state mode
 	d.Partial(true)
@@ -278,7 +270,7 @@ func resourceVaultDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
 	object := vault.NewDatabase(client)
 
 	object.ID = d.Id()
-	err := createUpateGetVaultDatabaseData(d, object)
+	err := createUpateGetDatabaseData(d, object)
 	if err != nil {
 		return err
 	}
@@ -290,13 +282,9 @@ func resourceVaultDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
 		"choose_connector", "connector_list") {
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("Error updating VaultDatabase attribute: %v", err)
+			return fmt.Errorf(" Error updating Database attribute: %v", err)
 		}
 		logger.Debugf("Updated attributes to: %+v", object)
-		d.SetPartial("name")
-		d.SetPartial("hostname")
-		d.SetPartial("database_class")
-		d.SetPartial("description")
 	}
 
 	// Deal with Set member
@@ -309,7 +297,7 @@ func resourceVaultDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
 			setObj.ObjectType = object.SetType
 			resp, err := setObj.UpdateSetMembers([]string{object.ID}, "remove")
 			if err != nil || !resp.Success {
-				return fmt.Errorf("Error removing VaultDatabase from Set: %v", err)
+				return fmt.Errorf(" Error removing Database from Set: %v", err)
 			}
 		}
 		// Add new Sets
@@ -319,10 +307,9 @@ func resourceVaultDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
 			setObj.ObjectType = object.SetType
 			resp, err := setObj.UpdateSetMembers([]string{object.ID}, "add")
 			if err != nil || !resp.Success {
-				return fmt.Errorf("Error adding VaultDatabase to Set: %v", err)
+				return fmt.Errorf(" Error adding Database to Set: %v", err)
 			}
 		}
-		d.SetPartial("sets")
 	}
 
 	// Deal with Permissions
@@ -339,7 +326,7 @@ func resourceVaultDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetPermissions(true)
 			if err != nil {
-				return fmt.Errorf("Error removing VaultDatabase permissions: %v", err)
+				return fmt.Errorf(" Error removing Database permissions: %v", err)
 			}
 		}
 
@@ -350,19 +337,18 @@ func resourceVaultDatabaseUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetPermissions(false)
 			if err != nil {
-				return fmt.Errorf("Error adding VaultDatabase permissions: %v", err)
+				return fmt.Errorf(" Error adding Database permissions: %v", err)
 			}
 		}
-		d.SetPartial("permission")
 	}
 
 	d.Partial(false)
-	logger.Infof("Updating of VaultDatabase completed: %s", object.Name)
+	logger.Infof("Updating of Database completed: %s", object.Name)
 	return resourceVaultDatabaseRead(d, m)
 }
 
 func resourceVaultDatabaseDelete(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning deletion of VaultDatabase: %s", ResourceIDString(d))
+	logger.Infof("Beginning deletion of Database: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
 	object := vault.NewDatabase(client)
@@ -372,32 +358,32 @@ func resourceVaultDatabaseDelete(d *schema.ResourceData, m interface{}) error {
 	// If the resource does not exist, inform Terraform. We want to immediately
 	// return here to prevent further processing.
 	if err != nil {
-		return fmt.Errorf("Error deleting VaultDatabase: %v", err)
+		return fmt.Errorf(" Error deleting Database: %v", err)
 	}
 
 	if resp.Success {
 		d.SetId("")
 	}
 
-	logger.Infof("Deletion of VaultDatabase completed: %s", ResourceIDString(d))
+	logger.Infof("Deletion of Database completed: %s", ResourceIDString(d))
 	return nil
 }
 
-func createUpateGetVaultDatabaseData(d *schema.ResourceData, object *vault.Database) error {
+func createUpateGetDatabaseData(d *schema.ResourceData, object *vault.Database) error {
 	// Database -> Settings menu related settings
 	object.Name = d.Get("name").(string)
 	object.FQDN = d.Get("hostname").(string)
 	object.DatabaseClass = d.Get("database_class").(string)
-	if v, ok := d.GetOk("description"); ok {
+	if v, ok := d.GetOk("description"); ok && d.HasChange("description") {
 		object.Description = v.(string)
 	}
 	if v, ok := d.GetOk("port"); ok {
 		object.Port = v.(int)
 	}
-	if v, ok := d.GetOk("instance_name"); ok {
+	if v, ok := d.GetOk("instance_name"); ok && d.HasChange("instance_name") {
 		object.InstanceName = v.(string)
 	}
-	if v, ok := d.GetOk("service_name"); ok {
+	if v, ok := d.GetOk("service_name"); ok && d.HasChange("service_name") {
 		object.ServiceName = v.(string)
 	}
 	if v, ok := d.GetOk("skip_reachability_test"); ok {
@@ -423,7 +409,7 @@ func createUpateGetVaultDatabaseData(d *schema.ResourceData, object *vault.Datab
 	if v, ok := d.GetOk("minimum_password_age"); ok {
 		object.MinimumPasswordAge = v.(int)
 	}
-	if v, ok := d.GetOk("password_profile_id"); ok {
+	if v, ok := d.GetOk("password_profile_id"); ok && d.HasChange("password_profile_id") {
 		object.PasswordProfileID = v.(string)
 	}
 	if v, ok := d.GetOk("enable_password_history_cleanup"); ok {

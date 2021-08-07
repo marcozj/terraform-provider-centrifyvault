@@ -107,7 +107,7 @@ func resourceVaultDomainConfigurationRead(d *schema.ResourceData, m interface{})
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error reading Domain: %v", err)
+		return fmt.Errorf(" Error reading Domain: %v", err)
 	}
 	//logger.Debugf("Domain from tenant: %v", object)
 
@@ -155,7 +155,7 @@ func resourceVaultDomainConfigurationCreate(d *schema.ResourceData, m interface{
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error reading Domain: %v", err)
+		return fmt.Errorf(" Error reading Domain: %v", err)
 	}
 
 	// Get the rest of attributes
@@ -167,16 +167,15 @@ func resourceVaultDomainConfigurationCreate(d *schema.ResourceData, m interface{
 	// set administrative account
 	err = object.SetAdminAccount()
 	if err != nil {
-		return fmt.Errorf("Error setting Domain administrative account: %v", err)
+		return fmt.Errorf(" Error setting Domain administrative account: %v", err)
 	}
 
-	d.SetPartial("administrative_account_id")
 	d.SetId(fmt.Sprintf("%s-configuration", object.ID))
 
 	// Update Reconciliation Options and Unix/Linux Local Accounts settings
 	_, err = object.Update()
 	if err != nil {
-		return fmt.Errorf("Error updating Domain: %v", err)
+		return fmt.Errorf(" Error updating Domain: %v", err)
 	}
 
 	// Creation completed
@@ -199,7 +198,7 @@ func resourceVaultDomainConfigurationUpdate(d *schema.ResourceData, m interface{
 	// return here to prevent further processing.
 	if err != nil {
 		//d.SetId("")
-		return fmt.Errorf("Error reading Domain: %v", err)
+		return fmt.Errorf(" Error reading Domain: %v", err)
 	}
 
 	err = createUpateGetDomainConfigurationData(d, object)
@@ -211,26 +210,16 @@ func resourceVaultDomainConfigurationUpdate(d *schema.ResourceData, m interface{
 	if d.HasChange("administrative_account_id") {
 		err := object.SetAdminAccount()
 		if err != nil {
-			return fmt.Errorf("Error updating Domain administrative account: %v", err)
+			return fmt.Errorf(" Error updating Domain administrative account: %v", err)
 		}
-		d.SetPartial("administrative_account_id")
 	}
 
 	if d.HasChanges("auto_domain_account_maintenance", "auto_local_account_maintenance", "manual_domain_account_unlock", "manual_local_account_unlock",
 		"provisioning_admin_id", "reconciliation_account_name", "enable_zonerole_workflow", "assigned_zonerole", "assigned_zonerole_approver") {
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("Error updating Domain attribute: %v", err)
+			return fmt.Errorf(" Error updating Domain attribute: %v", err)
 		}
-		d.SetPartial("auto_domain_account_maintenance")
-		d.SetPartial("auto_local_account_maintenance")
-		d.SetPartial("manual_domain_account_unlock")
-		d.SetPartial("manual_local_account_unlock")
-		d.SetPartial("provisioning_admin_id")
-		d.SetPartial("reconciliation_account_name")
-		d.SetPartial("enable_zonerole_workflow")
-		d.SetPartial("assigned_zonerole")
-		d.SetPartial("assigned_zonerole_approver")
 	}
 
 	d.Partial(false)
@@ -249,7 +238,7 @@ func resourceVaultDomainConfigurationDelete(d *schema.ResourceData, m interface{
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error reading Domain: %v", err)
+		return fmt.Errorf(" Error reading Domain: %v", err)
 	}
 	object.AdminAccountID = ""
 	object.ProvisioningAdminID = ""
@@ -264,12 +253,12 @@ func resourceVaultDomainConfigurationDelete(d *schema.ResourceData, m interface{
 
 	err = object.SetAdminAccount()
 	if err != nil {
-		return fmt.Errorf("Error setting Domain administrative account: %v", err)
+		return fmt.Errorf(" Error setting Domain administrative account: %v", err)
 	}
 
 	resp, err := object.Update()
 	if err != nil || !resp.Success {
-		return fmt.Errorf("Error removing of Domain Configuration: %v", err)
+		return fmt.Errorf(" Error removing of Domain Configuration: %v", err)
 	}
 
 	d.SetId("")
@@ -282,10 +271,10 @@ func createUpateGetDomainConfigurationData(d *schema.ResourceData, object *vault
 	if v, ok := d.GetOk("administrative_account_id"); ok {
 		object.AdminAccountID = v.(string)
 	}
-	if v, ok := d.GetOk("administrative_account_name"); ok {
+	if v, ok := d.GetOk("administrative_account_name"); ok && d.HasChange("administrative_account_name") {
 		object.AdminAccountName = v.(string)
 	}
-	if v, ok := d.GetOk("administrative_account_password"); ok {
+	if v, ok := d.GetOk("administrative_account_password"); ok && d.HasChange("administrative_account_password") {
 		object.AdminAccountPassword = v.(string)
 	}
 
@@ -294,10 +283,10 @@ func createUpateGetDomainConfigurationData(d *schema.ResourceData, object *vault
 	object.ManualDomainAccountUnlock = d.Get("manual_domain_account_unlock").(bool)
 	object.ManualLocalAccountUnlock = d.Get("manual_local_account_unlock").(bool)
 
-	if v, ok := d.GetOk("provisioning_admin_id"); ok {
+	if v, ok := d.GetOk("provisioning_admin_id"); ok && d.HasChange("provisioning_admin_id") {
 		object.ProvisioningAdminID = v.(string)
 	}
-	if v, ok := d.GetOk("reconciliation_account_name"); ok {
+	if v, ok := d.GetOk("reconciliation_account_name"); ok && d.HasChange("reconciliation_account_name") {
 		object.ReconciliationAccountName = v.(string)
 	}
 	// Zone Role Workflow

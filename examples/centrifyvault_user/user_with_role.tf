@@ -13,4 +13,11 @@ resource "centrifyvault_user" "testuser" {
     roles = [
         data.centrifyvault_role.system_admin.id
     ]
+
+    lifecycle {
+      ignore_changes = [
+        password,
+        confirm_password,
+        ]
+    }
 }

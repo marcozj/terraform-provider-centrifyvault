@@ -91,7 +91,7 @@ func resourceVaultSecret() *schema.Resource {
 }
 
 func resourceVaultSecretExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	logger.Infof("Checking VaultSecret exist: %s", ResourceIDString(d))
+	logger.Infof("Checking Secret exist: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
 	object := vault.NewSecret(client)
@@ -105,12 +105,12 @@ func resourceVaultSecretExists(d *schema.ResourceData, m interface{}) (bool, err
 		return false, err
 	}
 
-	logger.Infof("VaultSecret exists in tenant: %s", object.ID)
+	logger.Infof("Secret exists in tenant: %s", object.ID)
 	return true, nil
 }
 
 func resourceVaultSecretRead(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Reading VaultSecret: %s", ResourceIDString(d))
+	logger.Infof("Reading Secret: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
 	// Create a NewSecret object and populate ID attribute
@@ -122,9 +122,9 @@ func resourceVaultSecretRead(d *schema.ResourceData, m interface{}) error {
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error reading VaultSecret: %v", err)
+		return fmt.Errorf(" Error reading Secret: %v", err)
 	}
-	//logger.Debugf("VaultSecret from tenant: %+v", object)
+	//logger.Debugf("Secret from tenant: %+v", object)
 	schemamap, err := vault.GenerateSchemaMap(object)
 	if err != nil {
 		return err
@@ -141,12 +141,12 @@ func resourceVaultSecretRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	logger.Infof("Completed reading VaultSecret: %s", object.Name)
+	logger.Infof("Completed reading Secret: %s", object.Name)
 	return nil
 }
 
 func resourceVaultSecretCreate(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning VaultSecret creation: %s", ResourceIDString(d))
+	logger.Infof("Beginning Secret creation: %s", ResourceIDString(d))
 
 	// Enable partial state mode
 	d.Partial(true)
@@ -161,23 +161,16 @@ func resourceVaultSecretCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	resp, err := object.Create()
 	if err != nil {
-		return fmt.Errorf("Error creating VaultSecret: %v", err)
+		return fmt.Errorf(" Error creating Secret: %v", err)
 	}
 
 	id := resp.Result
 	if id == "" {
-		return fmt.Errorf("VaultSecret ID is not set")
+		return fmt.Errorf(" Secret ID is not set")
 	}
 	d.SetId(id)
 	// Need to populate ID attribute for subsequence processes
 	object.ID = id
-
-	d.SetPartial("secret_name")
-	d.SetPartial("description")
-	d.SetPartial("secret_text")
-	d.SetPartial("type")
-	d.SetPartial("folder_id")
-	d.SetPartial("parent_path")
 
 	// 2nd step to update password checkout profile
 	// Create API call doesn't set challenge profile so need to run update again
@@ -189,10 +182,8 @@ func resourceVaultSecretCreate(d *schema.ResourceData, m interface{}) error {
 	if object.DataVaultDefaultProfile != "" || object.ChallengeRules != nil {
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("Error updating VaultAccount attribute: %v", err)
+			return fmt.Errorf(" Error updating Secret attribute: %v", err)
 		}
-		d.SetPartial("default_profile_id")
-		d.SetPartial("challenge_rule")
 	}
 
 	if len(object.Sets) > 0 {
@@ -200,26 +191,24 @@ func resourceVaultSecretCreate(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return err
 		}
-		d.SetPartial("sets")
 	}
 
 	// add permissions
 	if _, ok := d.GetOk("permission"); ok {
 		_, err = object.SetPermissions(false)
 		if err != nil {
-			return fmt.Errorf("Error setting secret permissions: %v", err)
+			return fmt.Errorf(" Error setting secret permissions: %v", err)
 		}
-		d.SetPartial("permission")
 	}
 
 	// Creation completed
 	d.Partial(false)
-	logger.Infof("Creation of VaultSecret completed: %s", object.SecretName)
+	logger.Infof("Creation of Secret completed: %s", object.SecretName)
 	return resourceVaultSecretRead(d, m)
 }
 
 func resourceVaultSecretUpdate(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning VaultSecret update: %s", ResourceIDString(d))
+	logger.Infof("Beginning Secret update: %s", ResourceIDString(d))
 
 	// Enable partial state mode
 	d.Partial(true)
@@ -235,22 +224,16 @@ func resourceVaultSecretUpdate(d *schema.ResourceData, m interface{}) error {
 	// Deal with normal attribute changes first
 	if d.HasChanges("secret_name", "description", "secret_text", "folder_id", "type", "parent_path", "default_profile_id", "challenge_rule",
 		"workflow_enabled", "workflow_approver") {
+		// Special handling for default_profile_id. Whenever there is change, default_profile_id must be set otherwise default profile setting will be removed
+		if v, ok := d.GetOk("default_profile_id"); ok && !d.HasChange("default_profile_id") {
+			object.DataVaultDefaultProfile = v.(string)
+		}
+
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("Error updating VaultSecret attribute: %v", err)
+			return fmt.Errorf(" Error updating Secret attribute: %v", err)
 		}
 		logger.Debugf("Updated attributes to: %v", object)
-		d.SetPartial("secret_name")
-		d.SetPartial("description")
-		d.SetPartial("secret_text")
-		d.SetPartial("folder_id")
-		d.SetPartial("type")
-		d.SetPartial("parent_path")
-		d.SetPartial("default_profile_id")
-		d.SetPartial("challenge_rule")
-		d.SetPartial("workflow_enabled")
-		//d.SetPartial("workflow_default_options")
-		d.SetPartial("workflow_approver")
 	}
 
 	if d.HasChange("sets") {
@@ -262,7 +245,7 @@ func resourceVaultSecretUpdate(d *schema.ResourceData, m interface{}) error {
 			setObj.ObjectType = object.SetType
 			resp, err := setObj.UpdateSetMembers([]string{object.ID}, "remove")
 			if err != nil || !resp.Success {
-				return fmt.Errorf("Error removing secret from Set: %v", err)
+				return fmt.Errorf(" Error removing secret from Set: %v", err)
 			}
 		}
 		// Add new Sets
@@ -272,10 +255,9 @@ func resourceVaultSecretUpdate(d *schema.ResourceData, m interface{}) error {
 			setObj.ObjectType = object.SetType
 			resp, err := setObj.UpdateSetMembers([]string{object.ID}, "add")
 			if err != nil || !resp.Success {
-				return fmt.Errorf("Error adding secret to Set: %v", err)
+				return fmt.Errorf(" Error adding secret to Set: %v", err)
 			}
 		}
-		d.SetPartial("sets")
 	}
 
 	// Deal with Permissions
@@ -292,7 +274,7 @@ func resourceVaultSecretUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetPermissions(true)
 			if err != nil {
-				return fmt.Errorf("Error removing secret permissions: %v", err)
+				return fmt.Errorf(" Error removing secret permissions: %v", err)
 			}
 		}
 
@@ -303,20 +285,19 @@ func resourceVaultSecretUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetPermissions(false)
 			if err != nil {
-				return fmt.Errorf("Error adding secret permissions: %v", err)
+				return fmt.Errorf(" Error adding secret permissions: %v", err)
 			}
 		}
-		d.SetPartial("permission")
 	}
 
 	// We succeeded, disable partial mode. This causes Terraform to save all fields again.
 	d.Partial(false)
-	logger.Infof("Updating of VaultSecret completed: %s", object.Name)
+	logger.Infof("Updating of Secret completed: %s", object.Name)
 	return resourceVaultSecretRead(d, m)
 }
 
 func resourceVaultSecretDelete(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning deletion of VaultSecret: %s", ResourceIDString(d))
+	logger.Infof("Beginning deletion of Secret: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
 	object := vault.NewSecret(client)
@@ -332,7 +313,7 @@ func resourceVaultSecretDelete(d *schema.ResourceData, m interface{}) error {
 		object.ChallengeRules = nil
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("Error updating VaultSecret attribute: %v", err)
+			return fmt.Errorf(" Error updating Secret attribute: %v", err)
 		}
 	}
 
@@ -341,32 +322,30 @@ func resourceVaultSecretDelete(d *schema.ResourceData, m interface{}) error {
 	// If the resource does not exist, inform Terraform. We want to immediately
 	// return here to prevent further processing.
 	if err != nil {
-		return fmt.Errorf("Error deleting VaultSecret: %v", err)
+		return fmt.Errorf(" Error deleting Secret: %v", err)
 	}
 
 	if resp.Success {
 		d.SetId("")
 	}
 
-	logger.Infof("Deletion of VaultSecret completed: %s", ResourceIDString(d))
+	logger.Infof("Deletion of Secret completed: %s", ResourceIDString(d))
 	return nil
 }
 
 func getCreateSecretData(d *schema.ResourceData, object *vault.Secret) error {
 	object.SecretName = d.Get("secret_name").(string)
-	if v, ok := d.GetOk("description"); ok {
+	if v, ok := d.GetOk("description"); ok && d.HasChange("description") {
 		object.Description = v.(string)
 	}
-	if v, ok := d.GetOk("type"); ok {
-		object.Type = v.(string)
-	}
-	if v, ok := d.GetOk("secret_text"); ok {
+	object.Type = d.Get("type").(string)
+	if v, ok := d.GetOk("secret_text"); ok && d.HasChange("secret_text") {
 		object.SecretText = v.(string)
 	}
-	if v, ok := d.GetOk("folder_id"); ok {
+	if v, ok := d.GetOk("folder_id"); ok && d.HasChange("folder_id") {
 		object.FolderID = v.(string)
 	}
-	if v, ok := d.GetOk("parent_path"); ok {
+	if v, ok := d.GetOk("parent_path"); ok && d.HasChange("parent_path") {
 		object.ParentPath = v.(string)
 	}
 	// Workflow
@@ -386,7 +365,7 @@ func getCreateSecretData(d *schema.ResourceData, object *vault.Secret) error {
 func getUpateGetSecretData(d *schema.ResourceData, object *vault.Secret) error {
 	getCreateSecretData(d, object)
 
-	if v, ok := d.GetOk("default_profile_id"); ok {
+	if v, ok := d.GetOk("default_profile_id"); ok && d.HasChange("default_profile_id") {
 		object.DataVaultDefaultProfile = v.(string)
 	}
 	if v, ok := d.GetOk("sets"); ok {
@@ -401,11 +380,11 @@ func getUpateGetSecretData(d *schema.ResourceData, object *vault.Secret) error {
 		}
 	}
 	// Challenge rules
-	if v, ok := d.GetOk("challenge_rule"); ok {
+	if v, ok := d.GetOk("challenge_rule"); ok && d.HasChange("challenge_rule") {
 		object.ChallengeRules = expandChallengeRules(v.([]interface{}))
 		// Perform validations
 		if err := validateChallengeRules(object.ChallengeRules); err != nil {
-			return fmt.Errorf("Schema setting error: %s", err)
+			return fmt.Errorf(" Schema setting error: %s", err)
 		}
 	}
 
