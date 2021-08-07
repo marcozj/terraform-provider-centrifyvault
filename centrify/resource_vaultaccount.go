@@ -161,7 +161,7 @@ func resourceVaultAccount() *schema.Resource {
 }
 
 func resourceVaultAccountExists(d *schema.ResourceData, m interface{}) (bool, error) {
-	logger.Infof("Checking VaultAccount exist: %s", ResourceIDString(d))
+	logger.Infof("Checking Account exist: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
 	object := vault.NewAccount(client)
@@ -175,12 +175,12 @@ func resourceVaultAccountExists(d *schema.ResourceData, m interface{}) (bool, er
 		return false, err
 	}
 
-	logger.Infof("VaultAccount exists in tenant: %s", object.ID)
+	logger.Infof("Account exists in tenant: %s", object.ID)
 	return true, nil
 }
 
 func resourceVaultAccountRead(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Reading VaultAccount: %s", ResourceIDString(d))
+	logger.Infof("Reading Account: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
 	// Create a NewAccount object and populate ID attribute
@@ -192,9 +192,9 @@ func resourceVaultAccountRead(d *schema.ResourceData, m interface{}) error {
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error reading VaultAccount: %v", err)
+		return fmt.Errorf(" Error reading Account: %v", err)
 	}
-	//logger.Debugf("VaultAccount from tenant: %+v", object)
+	//logger.Debugf("Account from tenant: %+v", object)
 	schemamap, err := vault.GenerateSchemaMap(object)
 	if err != nil {
 		return err
@@ -224,16 +224,16 @@ func resourceVaultAccountRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	logger.Infof("Completed reading VaultAccount: %s", object.Name)
+	logger.Infof("Completed reading Account: %s", object.Name)
 	return nil
 }
 
 func resourceVaultAccountCreate(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning VaultAccount creation: %s", ResourceIDString(d))
+	logger.Infof("Beginning Account creation: %s", ResourceIDString(d))
 
 	client := m.(*restapi.RestClient)
 
-	// Create a VaultAccount object and populate all attributes
+	// Create an Account object and populate all attributes
 	object := vault.NewAccount(client)
 	err := createUpateGetAccountData(d, object)
 	if err != nil {
@@ -242,12 +242,12 @@ func resourceVaultAccountCreate(d *schema.ResourceData, m interface{}) error {
 
 	resp, err := object.Create()
 	if err != nil {
-		return fmt.Errorf("Error creating VaultAccount: %v", err)
+		return fmt.Errorf(" Error creating Account: %v", err)
 	}
 
 	id := resp.Result
 	if id == "" {
-		return fmt.Errorf("VaultAccount ID is not set")
+		return fmt.Errorf(" Account ID is not set")
 	}
 	d.SetId(id)
 	// Need to populate ID attribute for subsequence processes
@@ -258,9 +258,8 @@ func resourceVaultAccountCreate(d *schema.ResourceData, m interface{}) error {
 	if object.PasswordCheckoutDefaultProfile != "" {
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("Error updating VaultAccount attribute: %v", err)
+			return fmt.Errorf(" Error updating Account attribute: %v", err)
 		}
-		d.SetPartial("default_profile_id")
 	}
 
 	// Add to Sets
@@ -269,25 +268,22 @@ func resourceVaultAccountCreate(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return err
 		}
-		d.SetPartial("sets")
 	}
 
 	// add permissions
 	if _, ok := d.GetOk("permission"); ok {
 		_, err = object.SetPermissions(false)
 		if err != nil {
-			return fmt.Errorf("Error setting VaultAccount permissions: %v", err)
+			return fmt.Errorf(" Error setting Account permissions: %v", err)
 		}
-		d.SetPartial("permission")
 	}
 
 	// set as admin account
 	if object.IsAdminAccount {
 		err := object.SetAdminAccount(object.IsAdminAccount)
 		if err != nil {
-			return fmt.Errorf("Error setting VaultAccount as administrative account: %v", err)
+			return fmt.Errorf(" Error setting Account as administrative account: %v", err)
 		}
-		d.SetPartial("is_admin_account")
 	}
 
 	// add IAM account access key
@@ -296,20 +292,18 @@ func resourceVaultAccountCreate(d *schema.ResourceData, m interface{}) error {
 		for _, v := range object.AccessKeys {
 			err := object.SafeAddAccessKey(v)
 			if err != nil {
-				return fmt.Errorf("Error adding access key %s : %v", v.AccessKeyID, err)
+				return fmt.Errorf(" Error adding access key %s : %v", v.AccessKeyID, err)
 			}
 		}
-		d.SetPartial("access_key")
-
 	}
 
 	// Creation completed
-	logger.Infof("Creation of VaultAccount completed: %s", object.User)
+	logger.Infof("Creation of Account completed: %s", object.User)
 	return resourceVaultAccountRead(d, m)
 }
 
 func resourceVaultAccountUpdate(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning VaultAccount update: %s", ResourceIDString(d))
+	logger.Infof("Beginning Account update: %s", ResourceIDString(d))
 
 	// Enable partial state mode
 	d.Partial(true)
@@ -326,26 +320,18 @@ func resourceVaultAccountUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChanges("name", "credential_type", "host_id", "domain_id", "database_id", "cloudprovider_id", "sshkey_id", "description",
 		"use_proxy_account", "managed", "checkout_lifetime", "default_profile_id", "challenge_rule", "workflow_enabled",
 		"workflow_approver") {
+		// Special handling for default_profile_id. Whenever there is change, default_profile_id must be set otherwise default profile setting will be removed
+		if v, ok := d.GetOk("default_profile_id"); ok && !d.HasChange("default_profile_id") {
+			object.PasswordCheckoutDefaultProfile = v.(string)
+		}
+		if v, ok := d.GetOk("access_secret_checkout_default_profile_id"); ok && !d.HasChange("access_secret_checkout_default_profile_id") {
+			object.AccessSecretCheckoutDefaultProfile = v.(string)
+		}
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("Error updating VaultAccount attribute: %v", err)
+			return fmt.Errorf(" Error updating Account attribute: %v", err)
 		}
 		logger.Debugf("Updated attributes to: %v", object)
-		d.SetPartial("name")
-		d.SetPartial("credential_type")
-		d.SetPartial("sshkey_id")
-		d.SetPartial("host_id")
-		d.SetPartial("domain_id")
-		d.SetPartial("database_id")
-		d.SetPartial("cloudprovider_id")
-		d.SetPartial("description")
-		d.SetPartial("use_proxy_account")
-		d.SetPartial("managed")
-		d.SetPartial("checkout_lifetime")
-		d.SetPartial("default_profile_id")
-		d.SetPartial("challenge_rule")
-		d.SetPartial("workflow_enabled")
-		d.SetPartial("workflow_approver")
 	}
 
 	// Deal with Set member
@@ -358,7 +344,7 @@ func resourceVaultAccountUpdate(d *schema.ResourceData, m interface{}) error {
 			setObj.ObjectType = object.SetType
 			resp, err := setObj.UpdateSetMembers([]string{object.ID}, "remove")
 			if err != nil || !resp.Success {
-				return fmt.Errorf("Error removing VaultAccount from Set: %v", err)
+				return fmt.Errorf(" Error removing Account from Set: %v", err)
 			}
 		}
 		// Add new Sets
@@ -368,10 +354,9 @@ func resourceVaultAccountUpdate(d *schema.ResourceData, m interface{}) error {
 			setObj.ObjectType = object.SetType
 			resp, err := setObj.UpdateSetMembers([]string{object.ID}, "add")
 			if err != nil || !resp.Success {
-				return fmt.Errorf("Error adding VaultAccount to Set: %v", err)
+				return fmt.Errorf(" Error adding Account to Set: %v", err)
 			}
 		}
-		d.SetPartial("sets")
 	}
 
 	// Deal with Permissions
@@ -388,7 +373,7 @@ func resourceVaultAccountUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetPermissions(true)
 			if err != nil {
-				return fmt.Errorf("Error removing VaultAccount permissions: %v", err)
+				return fmt.Errorf(" Error removing Account permissions: %v", err)
 			}
 		}
 
@@ -399,28 +384,25 @@ func resourceVaultAccountUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetPermissions(false)
 			if err != nil {
-				return fmt.Errorf("Error adding VaultAccount permissions: %v", err)
+				return fmt.Errorf(" Error adding Account permissions: %v", err)
 			}
 		}
-		d.SetPartial("permission")
 	}
 
 	// Change password
 	if d.HasChange("password") {
 		resp, err := object.ChangePassword()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("Error updating VaultAccount password: %v", err)
+			return fmt.Errorf(" Error updating Account password: %v", err)
 		}
-		d.SetPartial("password")
 	}
 
 	// Handle admin account
 	if d.HasChange("is_admin_account") {
 		err := object.SetAdminAccount(object.IsAdminAccount)
 		if err != nil {
-			return fmt.Errorf("Error setting VaultAccount as administrative account: %v", err)
+			return fmt.Errorf(" Error setting Account as administrative account: %v", err)
 		}
-		d.SetPartial("is_admin_account")
 	}
 
 	// Deal with access key
@@ -428,49 +410,44 @@ func resourceVaultAccountUpdate(d *schema.ResourceData, m interface{}) error {
 		old, new := d.GetChange("access_key")
 		// Remove the old access keys
 		m := old.(*schema.Set).List()
-		if m != nil {
-			for _, v := range m {
-				id := v.(map[string]interface{})["id"].(string)
-				keyid := v.(map[string]interface{})["access_key_id"].(string)
-				if id != "" {
-					err := object.DeleteAccessKey(id)
-					if err != nil {
-						return fmt.Errorf("Error deleting access key %s : %v", keyid, err)
-					}
-					logger.Debugf("Deleted old key: %+v", keyid)
+		for _, v := range m {
+			id := v.(map[string]interface{})["id"].(string)
+			keyid := v.(map[string]interface{})["access_key_id"].(string)
+			if id != "" {
+				err := object.DeleteAccessKey(id)
+				if err != nil {
+					return fmt.Errorf(" Error deleting access key %s : %v", keyid, err)
 				}
-			}
-		}
-		// Add the new access keys
-		m = new.(*schema.Set).List()
-		if m != nil {
-			for _, v := range m {
-				keyid := v.(map[string]interface{})["access_key_id"].(string)
-				secretkey := v.(map[string]interface{})["secret_access_key"].(string)
-				key := vault.AccessKey{}
-				key.AccessKeyID = keyid
-				key.SecretAccessKey = secretkey
-				if keyid != "" {
-					err := object.SafeAddAccessKey(key)
-					if err != nil {
-						return fmt.Errorf("Error adding access key %s : %v", keyid, err)
-					}
-					logger.Debugf("Added new key: %+v", keyid)
-				}
+				logger.Debugf("Deleted old key: %+v", keyid)
 			}
 		}
 
-		d.SetPartial("access_key")
+		// Add the new access keys
+		m = new.(*schema.Set).List()
+		for _, v := range m {
+			keyid := v.(map[string]interface{})["access_key_id"].(string)
+			secretkey := v.(map[string]interface{})["secret_access_key"].(string)
+			key := vault.AccessKey{}
+			key.AccessKeyID = keyid
+			key.SecretAccessKey = secretkey
+			if keyid != "" {
+				err := object.SafeAddAccessKey(key)
+				if err != nil {
+					return fmt.Errorf(" Error adding access key %s : %v", keyid, err)
+				}
+				logger.Debugf("Added new key: %+v", keyid)
+			}
+		}
 	}
 
 	// We succeeded, disable partial mode. This causes Terraform to save all fields again.
 	d.Partial(false)
-	logger.Infof("Updating of VaultAccount completed: %s", object.Name)
+	logger.Infof("Updating of Account completed: %s", object.Name)
 	return resourceVaultAccountRead(d, m)
 }
 
 func resourceVaultAccountDelete(d *schema.ResourceData, m interface{}) error {
-	logger.Infof("Beginning deletion of VaultAccount: %s", ResourceIDString(d))
+	logger.Infof("Beginning deletion of Account: %s", ResourceIDString(d))
 	client := m.(*restapi.RestClient)
 
 	object := vault.NewAccount(client)
@@ -483,7 +460,7 @@ func resourceVaultAccountDelete(d *schema.ResourceData, m interface{}) error {
 		if v.(bool) {
 			err := object.SetAdminAccount(false)
 			if err != nil {
-				return fmt.Errorf("Error clearing VaultAccount as administrative account: %v", err)
+				return fmt.Errorf(" Error clearing Account as administrative account: %v", err)
 			}
 		}
 	}
@@ -493,14 +470,14 @@ func resourceVaultAccountDelete(d *schema.ResourceData, m interface{}) error {
 	// If the resource does not exist, inform Terraform. We want to immediately
 	// return here to prevent further processing.
 	if err != nil {
-		return fmt.Errorf("Error deleting VaultAccount: %v", err)
+		return fmt.Errorf(" Error deleting Account: %v", err)
 	}
 
 	if resp.Success {
 		d.SetId("")
 	}
 
-	logger.Infof("Deletion of VaultAccount completed: %s", ResourceIDString(d))
+	logger.Infof("Deletion of Account completed: %s", ResourceIDString(d))
 	return nil
 }
 
@@ -509,7 +486,7 @@ func createUpateGetAccountData(d *schema.ResourceData, object *vault.Account) er
 	if v, ok := d.GetOk("credential_type"); ok {
 		object.CredentialType = v.(string)
 	}
-	if v, ok := d.GetOk("password"); ok {
+	if v, ok := d.GetOk("password"); ok && d.HasChange("password") {
 		object.Password = v.(string)
 	}
 	if v, ok := d.GetOk("sshkey_id"); ok {
@@ -540,13 +517,13 @@ func createUpateGetAccountData(d *schema.ResourceData, object *vault.Account) er
 	if v, ok := d.GetOk("managed"); ok {
 		object.IsManaged = v.(bool)
 	}
-	if v, ok := d.GetOk("description"); ok {
+	if v, ok := d.GetOk("description"); ok && d.HasChange("description") {
 		object.Description = v.(string)
 	}
 	if v, ok := d.GetOk("checkout_lifetime"); ok {
 		object.DefaultCheckoutTime = v.(int)
 	}
-	if v, ok := d.GetOk("default_profile_id"); ok {
+	if v, ok := d.GetOk("default_profile_id"); ok && d.HasChange("default_profile_id") {
 		object.PasswordCheckoutDefaultProfile = v.(string)
 	}
 	if v, ok := d.GetOk("sets"); ok {
@@ -555,7 +532,7 @@ func createUpateGetAccountData(d *schema.ResourceData, object *vault.Account) er
 	if v, ok := d.GetOk("access_key"); ok {
 		object.AccessKeys = expandAccessKeys(v)
 	}
-	if v, ok := d.GetOk("access_secret_checkout_default_profile_id"); ok {
+	if v, ok := d.GetOk("access_secret_checkout_default_profile_id"); ok && d.HasChange("access_secret_checkout_default_profile_id") {
 		object.AccessSecretCheckoutDefaultProfile = v.(string)
 	}
 	// Workflow
@@ -580,19 +557,19 @@ func createUpateGetAccountData(d *schema.ResourceData, object *vault.Account) er
 		}
 	}
 	// Challenge rules
-	if v, ok := d.GetOk("challenge_rule"); ok {
+	if v, ok := d.GetOk("challenge_rule"); ok && d.HasChange("challenge_rule") {
 		object.ChallengeRules = expandChallengeRules(v.([]interface{}))
 		// Perform validations
 		if err := validateChallengeRules(object.ChallengeRules); err != nil {
-			return fmt.Errorf("Schema setting error: %s", err)
+			return fmt.Errorf(" Schema setting error: %s", err)
 		}
 	}
 	// Secret Access Key checkout Challenge rules
-	if v, ok := d.GetOk("access_secret_checkout_rule"); ok {
+	if v, ok := d.GetOk("access_secret_checkout_rule"); ok && d.HasChange("access_secret_checkout_rule") {
 		object.AccessSecretCheckoutRules = expandChallengeRules(v.([]interface{}))
 		// Perform validations
 		if err := validateChallengeRules(object.ChallengeRules); err != nil {
-			return fmt.Errorf("Schema setting error: %s", err)
+			return fmt.Errorf(" Schema setting error: %s", err)
 		}
 	}
 
@@ -600,7 +577,7 @@ func createUpateGetAccountData(d *schema.ResourceData, object *vault.Account) er
 	if object.ID == "" {
 		if err := object.ValidateCredentialType(); err != nil {
 			logger.Errorf("there is error: %s", err)
-			return fmt.Errorf("Schema setting error: %s", err)
+			return fmt.Errorf(" Schema setting error: %s", err)
 		}
 	}
 	return nil

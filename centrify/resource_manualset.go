@@ -101,7 +101,7 @@ func resourceManualSetRead(d *schema.ResourceData, m interface{}) error {
 	// return here to prevent further processing.
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("error reading Manual Set: %v", err)
+		return fmt.Errorf(" Error reading Manual Set: %v", err)
 	}
 	//logger.Debugf("Manual Set from tenant: %v", object)
 
@@ -139,19 +139,14 @@ func resourceManualSetCreate(d *schema.ResourceData, m interface{}) error {
 
 	resp, err := object.Create()
 	if err != nil {
-		return fmt.Errorf("error creating Manual Set: %v", err)
+		return fmt.Errorf(" Error creating Manual Set: %v", err)
 	}
 
 	id := resp.Result
 	if id == "" {
-		return fmt.Errorf("the Manual Set ID is not set")
+		return fmt.Errorf(" Ehe Manual Set ID is not set")
 	}
 	d.SetId(id)
-	// Creation partially completed
-	d.SetPartial("name")
-	d.SetPartial("type")
-	d.SetPartial("subtype")
-	d.SetPartial("description")
 	// Need to populate ID attribute for subsequence processes
 	object.ID = id
 
@@ -160,18 +155,16 @@ func resourceManualSetCreate(d *schema.ResourceData, m interface{}) error {
 
 		_, err = object.SetPermissions(false)
 		if err != nil {
-			return fmt.Errorf("error setting Manual Set permissions: %v", err)
+			return fmt.Errorf(" Error setting Manual Set permissions: %v", err)
 		}
-		d.SetPartial("permission")
 	}
 
 	// Handle Set member permissions
 	if _, ok := d.GetOk("member_permission"); ok {
 		_, err = object.SetMemberPermissions(false)
 		if err != nil {
-			return fmt.Errorf("error setting Manual Set member permissions: %v", err)
+			return fmt.Errorf(" Error setting Manual Set member permissions: %v", err)
 		}
-		d.SetPartial("member_permission")
 	}
 
 	// Creation completed
@@ -202,11 +195,9 @@ func resourceManualSetUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChanges("name", "description") {
 		resp, err := object.Update()
 		if err != nil || !resp.Success {
-			return fmt.Errorf("error updating Manual Set attribute: %v", err)
+			return fmt.Errorf(" Error updating Manual Set attribute: %v", err)
 		}
 		//logger.Debugf("Updated attributes to: %v", object)
-		d.SetPartial("name")
-		d.SetPartial("description")
 	}
 
 	// Deal with permission changes
@@ -223,7 +214,7 @@ func resourceManualSetUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetPermissions(true)
 			if err != nil {
-				return fmt.Errorf("error removing Manual Set permissions: %v", err)
+				return fmt.Errorf(" Error removing Manual Set permissions: %v", err)
 			}
 		}
 
@@ -234,10 +225,9 @@ func resourceManualSetUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetPermissions(false)
 			if err != nil {
-				return fmt.Errorf("error adding Manual Set permissions: %v", err)
+				return fmt.Errorf(" Error adding Manual Set permissions: %v", err)
 			}
 		}
-		d.SetPartial("permission")
 	}
 
 	// Deal with member permission changes
@@ -253,7 +243,7 @@ func resourceManualSetUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetMemberPermissions(true)
 			if err != nil {
-				return fmt.Errorf("error removing Manual Set member permissions: %v", err)
+				return fmt.Errorf(" Error removing Manual Set member permissions: %v", err)
 			}
 		}
 
@@ -265,10 +255,9 @@ func resourceManualSetUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 			_, err = object.SetMemberPermissions(false)
 			if err != nil {
-				return fmt.Errorf("error adding Manual Set member permissions: %v", err)
+				return fmt.Errorf(" Error adding Manual Set member permissions: %v", err)
 			}
 		}
-		d.SetPartial("member_permission")
 	}
 
 	// We succeeded, disable partial mode. This causes Terraform to save all fields again.
@@ -288,7 +277,7 @@ func resourceManualSetDelete(d *schema.ResourceData, m interface{}) error {
 	// If the resource does not exist, inform Terraform. We want to immediately
 	// return here to prevent further processing.
 	if err != nil {
-		return fmt.Errorf("error deleting Manual Set: %v", err)
+		return fmt.Errorf(" Error deleting Manual Set: %v", err)
 	}
 
 	if resp.Success {
@@ -303,7 +292,7 @@ func createUpateGetManualSetData(d *schema.ResourceData, object *vault.ManualSet
 	object.Name = d.Get("name").(string)
 	object.ObjectType = d.Get("type").(string)
 	object.SubObjectType = d.Get("subtype").(string)
-	if v, ok := d.GetOk("description"); ok {
+	if v, ok := d.GetOk("description"); ok && d.HasChange("description") {
 		object.Description = v.(string)
 	}
 
