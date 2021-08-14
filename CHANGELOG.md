@@ -1,5 +1,11 @@
 # RELEASE NOTES
 
+## 0.1.11 (Aug 14, 2021)
+
+IMPROVEMENTS:
+
+- **New Resource:** `centrifyvault_role_membership`
+
 ## 0.1.10 (Aug 7, 2021)
 
 BUG FIXES:
