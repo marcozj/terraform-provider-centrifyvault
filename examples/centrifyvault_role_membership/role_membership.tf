@@ -1,4 +1,3 @@
-// Existing Centrify Directory user
 data "centrifyvault_user" "admin" {
     username = "admin@example.com"
 }
@@ -16,7 +15,7 @@ data "centrifyvault_directoryobject" "ad_user" {
     directory_services = [
         data.centrifyvault_directoryservice.demo_lab.id
     ]
-    name = "ad.user"
+    name = "alex.foster@demo.lab"
     object_type = "User"
 }
 
@@ -33,29 +32,45 @@ data "centrifyvault_directoryobject" "federated_user" {
     directory_services = [
         data.centrifyvault_directoryservice.federated_dir.id
     ]
-    name = "federated.user@democorp.club"
+    name = "alex.foster@democorp.club"
     object_type = "User"
 }
 
-resource "centrifyvault_role" "test_role" {
-    name = "Test role"
-    description = "Test Role that has role as member."
+// Existing federated (virtual) group
+data "centrifyvault_federatedgroup" "fedgroup1" {
+  name = "Okta Infra Admins"
+}
 
-    // Centrify Directory user
-    member {
-        id = data.centrifyvault_user.admin.id
-        type = "User"
-    }
+// Existing role whose membership to be managed
+data "centrifyvault_role" "testrole" {
+    name = "Test Role"
+}
 
-    // Active Directory user
-    member {
-        id = data.centrifyvault_directoryobject.ad_user.id
-        type = "User"
-    }
+// Role membership for exsting role
+resource "centrifyvault_role_membership" "testrolemembers" {
+  role_id = data.centrifyvault_role.testrole.id
 
-    // Federated user
-    member {
-        id = data.centrifyvault_directoryobject.federated_user.id
-        type = "User"
-    }
+  // Centrify Directory user
+  member {
+    id = data.centrifyvault_user.admin.id
+    type = "User"
+  }
+
+  // Active Directory user
+  member {
+    id = data.centrifyvault_directoryobject.ad_user.id
+    type = "User"
+  }
+
+  // Federated user
+  member {
+    id = data.centrifyvault_directoryobject.federated_user.id
+    type = "User"
+  }
+
+  // Existing federated (virtual) group
+  member {
+    id = data.centrifyvault_federatedgroup.fedgroup1.id
+    type = "Group"
+  }
 }
