@@ -1,5 +1,12 @@
 # RELEASE NOTES
 
+## 0.1.13 (Sep 07, 2021)
+
+BUG FIXES:
+
+- Fix OAuth client user creation issue whereby email shall not be set and missing InEverybodyRole attribute during creation that results in Save button activated even without changes
+
+
 ## 0.1.12 (Sep 07, 2021)
 
 IMPROVEMENTS:
