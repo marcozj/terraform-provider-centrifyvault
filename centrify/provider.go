@@ -111,6 +111,7 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"centrifyvault_user":                      resourceUser(),
+			"centrifyvault_userpassword":              resourceUserPassword(),
 			"centrifyvault_role":                      resourceRole(),
 			"centrifyvault_role_membership":           resourceRoleMembership(),
 			"centrifyvault_policyorder":               resourcePolicyLinks(),
